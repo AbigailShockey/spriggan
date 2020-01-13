@@ -1,4 +1,4 @@
-import os, time, datetime
+import os, time, datetime, sys
 
 # returns (num jobs,num cpus per job)
 def cpu_count(num):
@@ -31,6 +31,7 @@ class StatusTracker:
     # 1 = trimmed
     # 3 = assemble
     # 4 = abricate
+    # 5 = quast
     def __init__(self):
         self.status_code = {'start':'0','trimmed':'0','assemble':'0','abricate':'0'}
         self.status_file_path = ''
