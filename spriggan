@@ -13,7 +13,7 @@ from shutil import copyfile
 # local libraries
 from app.lib import cpu_count, checkexists
 from app.lib import StatusTracker as ST
-from app.runPipeline import pipeline
+from app.runPipeline import spriggan_pipeline
 
 # setup signal handler
 def handler(sig,frame):
@@ -74,6 +74,4 @@ jobs,cpu_job = cpu_count(threads)
 tracker = ST()
 outdir = tracker.initialize(out,pipeline)
 
-if not tracker.check_status('trimmed'):
-    # start pipeline
-    pipeline(paired_reads,jobs,cpu_job,outdir,tracker)
+spriggan_pipeline(paired_reads,jobs,cpu_job,outdir,tracker)
