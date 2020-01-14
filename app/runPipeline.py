@@ -131,23 +131,54 @@ def abricate(jobs,cpu_job,outdir):
         assembly_file = os.path.basename(path)
         assembly_dir = os.path.basename(os.path.dirname(path))
         sid = os.path.basename(path).split('.')[0]
-        cmds.append(f'abricate --db ncbi {assembly_dir}/{assembly_file}')
+        cmds.append(f'abricate --db ncbi --quiet /data/{assembly_dir}/{assembly_file}')
 
         # start multiprocessing
         pool = mp.Pool(processes=jobs)
-        print('Beginning abricate')
+        print('Beginning Abricate')
 
         # output
         handle = sid + '.tab'
         logfile = os.path.join(abricate_path,handle)
         with open(logfile,'a') as outlog:
             # run commands and get results
-            results = pool.starmap_async(cd.call,[['staphb/abricate',cmd,'/data',{input_path:'/data',abricate_path:'/output'}] for cmd in cmds])
+            results = pool.starmap_async(cd.call,[['staphb/abricate',cmd,'/data',{input_path:'/data'}] for cmd in cmds])
             stdouts = results.get()
             for stdout in stdouts:
                 outlog.write(stdout)
         cmds = []
         print('Finished running Abricate')
+
+
+    # get tsvs
+    tsvs = list(getfiles(abricate_path))[0]
+
+    # setup command list and abricate tsv list string
+    cmds = []
+    tsv_files = ''
+
+    for path in tsvs:
+        abricate_file = os.path.basename(path)
+        tsv_files = tsv_files + f'/data/{abricate_file} '
+
+    # main command
+    cmds.append(f'abricate --summary --quiet '+ tsv_files)
+
+    # start multiprocessing
+    pool = mp.Pool(processes=jobs)
+    print('Beginning Abricate summary')
+
+    # output
+    logfile = os.path.join(abricate_path,'abricate_summary.tab')
+    with open(logfile,'a') as outlog:
+        # run command and get results
+        results = pool.starmap_async(cd.call,[['staphb/abricate',cmd,'/data',{abricate_path:'/data'}] for cmd in cmds])
+        stdouts = results.get()
+        for stdout in stdouts:
+            outlog.write(stdout)
+    print('Finished running Abricate summary')
+    shutil.copyfile(logfile,os.path.join(outdir,'abricate_summary.tab'))
+
 
 # quast function
 def quast(ref,jobs,cpu_job,outdir):
@@ -155,8 +186,7 @@ def quast(ref,jobs,cpu_job,outdir):
     input_path = os.path.join(outdir,'assemblies')
     ref_path = os.path.dirname(ref)
     ref_genome = os.path.basename(ref)
-    print(ref_path)
-    print(ref_genome)
+
     # determine free ram
     free_ram = int(psutil.virtual_memory()[1]/1000000000)
     ram_job = int(free_ram / jobs)
@@ -180,15 +210,15 @@ def quast(ref,jobs,cpu_job,outdir):
 
     # main command
     cmds.append(f'quast.py -t {cpu_job} -o /output/ -r /reference/{ref_genome} '+ fasta_files)
-    print(cmds)
+
     # start multiprocessing
     pool = mp.Pool(processes=jobs)
-    print('Begining Quast:\n Number of Jobs: {0}\n CPUs/Job: {1}'.format(jobs,cpu_job))
+    print('Beginning Quast:\n Number of Jobs: {0}\n CPUs/Job: {1}'.format(jobs,cpu_job))
 
     # denote logs
     with open(logfile,'a') as outlog:
         outlog.write('***********\n')
-        outlog.write('Assembly\n')
+        outlog.write('Quast\n')
         # run commands and get results
         results = pool.starmap_async(cd.call,[['staphb/quast',cmd,'/data',{input_path:'/data',ref_path:'/reference',quast_path:'/output'}] for cmd in cmds])
         stdouts = results.get()
@@ -197,31 +227,27 @@ def quast(ref,jobs,cpu_job,outdir):
             outlog.write(stdout)
         outlog.write('***********\n')
     print('Finished running quast')
-
+    shutil.copyfile(os.path.join(quast_path,'transposed_report.tsv'),os.path.join(outdir,'quast_report.tsv'))
 
 # ------------------------------------------------------
 
 def spriggan_pipeline(paired_reads,ref,jobs,cpu_job,outdir,tracker):
     if not tracker.check_status('trimmed'):
-        print('Starting trimming')
         print('Trimming reads with Trimmomatic')
         q_trim(paired_reads,jobs,cpu_job,outdir,tracker)
         tracker.update_status_done('trimmed')
 
     if not tracker.check_status('assemble'):
-        print('Starting assembly')
         print('Assembling reads using Shovill')
         assemble_reads(jobs,cpu_job,outdir)
         tracker.update_status_done('assemble')
 
     if not tracker.check_status('abricate'):
-        print('Starting Abricate')
         print('IDing AR genes with Abricate')
         abricate(jobs,cpu_job,outdir)
         tracker.update_status_done('abricate')
 
     if not tracker.check_status('quast'):
-        print('Starting Quast')
         print('Evaluating assembly quality with Quast')
         quast(ref,jobs,cpu_job,outdir)
         tracker.update_status_done('quast')
