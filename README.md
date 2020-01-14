@@ -14,7 +14,7 @@ The input to Spriggan is a reference genome and a file listing paths to short re
 usage: ./spriggan [-h] [-o output] [-t] reads reference
 
 required arguments:
-  reads             file of paths to reads
+  reads             file listing paths to reads
   reference         reference genome for quast
   
 optional arguments:
