@@ -124,6 +124,7 @@ def getfiles(path):
     # scan path and look for files
     fastq_files = []
     fasta_files = []
+    tsv_files = []
 
     for root,dirs,files in os.walk(path):
         for file in files:
@@ -131,6 +132,8 @@ def getfiles(path):
                 fastq_files.append(os.path.join(root,file))
             if ".fa" in file and "spades" not in file:
                 fasta_files.append(os.path.join(root,file))
+            if ".tab" in file:
+                tsv_files.append(os.path.join(root,file))
 
     if len(fastq_files) > 0:
         fastq_files.sort()
@@ -143,3 +146,6 @@ def getfiles(path):
 
     if len(fasta_files) > 0:
         yield fasta_files
+
+    if len(tsv_files) > 0:
+        yield tsv_files
