@@ -8,7 +8,7 @@ Spriggan uses Trimmomatic to trim reads, Shovill to assemble reads, Abricate to 
 
 ### Using Spriggan
 
-The input to Spriggan is a file listing the paths to short reads for assembly and a reference genome 
+The input to Spriggan is a reference genome and a file listing paths to short reads for assembly
 
 ```
 usage: ./spriggan [-h] [-o output] [-t] reads reference
