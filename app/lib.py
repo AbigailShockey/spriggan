@@ -1,4 +1,4 @@
-import os, time, datetime, sys
+import os, sys, time, datetime
 
 # returns (num jobs,num cpus per job)
 def cpu_count(num):
@@ -33,15 +33,15 @@ class StatusTracker:
     # 4 = abricate
     # 5 = quast
     def __init__(self):
-        self.status_code = {'start':'0','trimmed':'0','assemble':'0','abricate':'0'}
+        self.status_code = {'start':'0','trimmed':'0','assemble':'0','abricate':'0','quast':'0'}
         self.status_file_path = ''
 
     def reset_code(self):
-        self.status_code = {'start':'0','trimmed':'0','assemble':'0','abricate':'0'}
+        self.status_code = {'start':'0','trimmed':'0','assemble':'0','abricate':'0','quast':'0'}
 
     # check if we have completed the requested pipeline, internal function
     def checkComplete(self,pipeline):
-        if self.status_code['abricate'] == '1':
+        if self.status_code['quast'] == '1':
             return True
         else:
             return False
@@ -124,7 +124,7 @@ def getfiles(path):
     # scan path and look for files
     fastq_files = []
     fasta_files = []
-    gff_files = []
+
     for root,dirs,files in os.walk(path):
         for file in files:
             if ".fastq.gz" in file:
