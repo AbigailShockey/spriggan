@@ -6,6 +6,8 @@ Spriggan trims and assembles short read bacterial sequence data, identifies anti
 
 Spriggan uses Trimmomatic to trim reads, Shovill to assemble reads, Abricate to ID AR genes and Quast to assess assembly quality.
 
+Spriggan uses Docker to maintain stability, reproducibility, portability and ease of use by keeping its dependencies in a controlled environment.
+
 ### Using Spriggan
 
 The input to Spriggan is a reference genome and a file listing paths to short reads for assembly
