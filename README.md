@@ -24,3 +24,11 @@ optional arguments:
   -o            output directory, defaults to working directory
   -t            threads to use
 ```
+
+### Why name it Jormungandr?
+
+Spriggan is heavily based on the [Dryad pipeline](https://github.com/k-florek/dryad). Dryads and Spriggans are both nature-based fantastical creatures from Greek and Cornish mythology, respectively. 
+
+### Author
+
+Abigail C. Shockey
